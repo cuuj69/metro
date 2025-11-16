@@ -303,25 +303,27 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+        .transaction-status-cell {
+            text-align: center;
+        }
         .transaction-status {
             display: inline-block;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.85rem;
             font-weight: 600;
-            margin-left: 8px;
         }
         .status-processing {
             background-color: #fff3cd;
             color: #856404;
         }
         .status-pending {
-            background-color: #d1ecf1;
-            color: #0c5460;
+            background-color: #ffc107;
+            color: #856404;
         }
         .status-completed {
-            background-color: #d4edda;
-            color: #155724;
+            background-color: #0dd387;
+            color: #fff;
         }
         /* Toast Notifications */
         .toast-container {
@@ -678,70 +680,12 @@
                                 <th>Date</th>
                                 <th>Description</th>
                                 <th>Reference</th>
+                                <th style="text-align: center;">Status</th>
                                 <th style="text-align: right;">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="transaction-date">15 Jan 2025</td>
-                                <td class="transaction-description">Dividend Payment</td>
-                                <td>DIV-2025-001</td>
-                                <td class="transaction-amount credit">+£12,450.00</td>
-                            </tr>
-                            <tr>
-                                <td class="transaction-date">12 Jan 2025</td>
-                                <td class="transaction-description">Property Rental Income</td>
-                                <td>RENT-JAN-2025</td>
-                                <td class="transaction-amount credit">+£3,200.00</td>
-                            </tr>
-                            <tr>
-                                <td class="transaction-date">10 Jan 2025</td>
-                                <td class="transaction-description">Trustee Fee Payment</td>
-                                <td>FEE-2025-01</td>
-                                <td class="transaction-amount debit">-£1,500.00</td>
-                            </tr>
-                            <tr>
-                                <td class="transaction-date">8 Jan 2025</td>
-                                <td class="transaction-description">Investment Transfer</td>
-                                <td>INV-2025-045</td>
-                                <td class="transaction-amount debit">-£25,000.00</td>
-                            </tr>
-                            <tr>
-                                <td class="transaction-date">5 Jan 2025</td>
-                                <td class="transaction-description">Beneficiary Payment</td>
-                                <td>BEN-2025-003</td>
-                                <td class="transaction-amount debit">-£5,000.00</td>
-                            </tr>
-                            <tr>
-                                <td class="transaction-date">3 Jan 2025</td>
-                                <td class="transaction-description">Interest Payment</td>
-                                <td>INT-JAN-2025</td>
-                                <td class="transaction-amount credit">+£1,234.56</td>
-                            </tr>
-                            <tr>
-                                <td class="transaction-date">28 Dec 2024</td>
-                                <td class="transaction-description">Charitable Donation</td>
-                                <td>CHAR-2024-089</td>
-                                <td class="transaction-amount debit">-£2,500.00</td>
-                            </tr>
-                            <tr>
-                                <td class="transaction-date">22 Dec 2024</td>
-                                <td class="transaction-description">Property Maintenance</td>
-                                <td>MAINT-DEC-2024</td>
-                                <td class="transaction-amount debit">-£3,750.00</td>
-                            </tr>
-                            <tr>
-                                <td class="transaction-date">18 Dec 2024</td>
-                                <td class="transaction-description">Investment Return</td>
-                                <td>INV-RET-2024</td>
-                                <td class="transaction-amount credit">+£8,900.00</td>
-                            </tr>
-                            <tr>
-                                <td class="transaction-date">15 Dec 2024</td>
-                                <td class="transaction-description">Account Opening Fee</td>
-                                <td>FEE-OPENING</td>
-                                <td class="transaction-amount debit">-£150.00</td>
-                            </tr>
+                            <!-- Transactions will be loaded dynamically -->
                         </tbody>
                     </table>
                 </div>
@@ -884,35 +828,128 @@
         });
         document.getElementById('lastLogin').textContent = lastLogin;
         
-        // API base URL
-        const API_BASE = 'http://localhost:5001'; // Transactions API
-        const OTP_API_BASE = 'http://localhost:5000'; // OTP API
-        
-        // Load transactions from API
-        async function loadTransactions() {
-            try {
-                const response = await fetch(`${API_BASE}/api/transactions`);
-                
-                if (!response.ok) {
-                    throw new Error(`Server returned ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.success && data.transactions) {
-                    updateTransactionsTable(data.transactions);
-                }
-            } catch (error) {
-                console.error('Error loading transactions:', error);
-                // Only show error toast once, not on every poll
-                if (!window.apiErrorShown) {
-                    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                        showToast('Transactions API is not running. Please start the server: python api/transactions.py', 'warning', 'API Server Offline');
-                        window.apiErrorShown = true;
-                    }
-                }
-                // Keep existing transactions if API fails
+        // Local transactions storage
+        let localTransactions = [
+            {
+                id: 'TXN001',
+                date: '15 Jan 2025',
+                description: 'Dividend Payment',
+                reference: 'DIV-2025-001',
+                amount: 12450.00,
+                type: 'credit',
+                status: 'completed'
+            },
+            {
+                id: 'TXN002',
+                date: '12 Jan 2025',
+                description: 'Property Rental Income',
+                reference: 'RENT-JAN-2025',
+                amount: 3200.00,
+                type: 'credit',
+                status: 'completed'
+            },
+            {
+                id: 'TXN003',
+                date: '10 Jan 2025',
+                description: 'Trustee Fee Payment',
+                reference: 'FEE-2025-01',
+                amount: -1500.00,
+                type: 'debit',
+                status: 'completed'
+            },
+            {
+                id: 'TXN004',
+                date: '8 Jan 2025',
+                description: 'Investment Transfer',
+                reference: 'INV-2025-045',
+                amount: -25000.00,
+                type: 'debit',
+                status: 'completed'
+            },
+            {
+                id: 'TXN005',
+                date: '5 Jan 2025',
+                description: 'Beneficiary Payment',
+                reference: 'BEN-2025-003',
+                amount: -5000.00,
+                type: 'debit',
+                status: 'completed'
+            },
+            {
+                id: 'TXN006',
+                date: '3 Jan 2025',
+                description: 'Interest Payment',
+                reference: 'INT-JAN-2025',
+                amount: 1234.56,
+                type: 'credit',
+                status: 'completed'
+            },
+            {
+                id: 'TXN007',
+                date: '28 Dec 2024',
+                description: 'Charitable Donation',
+                reference: 'CHAR-2024-089',
+                amount: -2500.00,
+                type: 'debit',
+                status: 'completed'
+            },
+            {
+                id: 'TXN008',
+                date: '22 Dec 2024',
+                description: 'Property Maintenance',
+                reference: 'MAINT-DEC-2024',
+                amount: -3750.00,
+                type: 'debit',
+                status: 'completed'
+            },
+            {
+                id: 'TXN009',
+                date: '18 Dec 2024',
+                description: 'Investment Return',
+                reference: 'INV-RET-2024',
+                amount: 8900.00,
+                type: 'credit',
+                status: 'completed'
+            },
+            {
+                id: 'TXN010',
+                date: '15 Dec 2024',
+                description: 'Account Opening Fee',
+                reference: 'FEE-OPENING',
+                amount: -150.00,
+                type: 'debit',
+                status: 'completed'
             }
+        ];
+        
+        // Load transactions from local storage or use default
+        function loadTransactions() {
+            // Try to load from sessionStorage first
+            const stored = sessionStorage.getItem('dashboardTransactions');
+            if (stored) {
+                try {
+                    localTransactions = JSON.parse(stored);
+                } catch (e) {
+                    console.error('Error parsing stored transactions:', e);
+                }
+            }
+            
+            // Sort by date (newest first) - convert date strings to sortable format
+            const sortedTransactions = [...localTransactions].sort((a, b) => {
+                // If has timestamp, use that, otherwise parse date
+                if (a.timestamp && b.timestamp) {
+                    return b.timestamp - a.timestamp;
+                }
+                // Simple date comparison (newest first)
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            updateTransactionsTable(sortedTransactions);
+        }
+        
+        // Save transactions to sessionStorage
+        function saveTransactions() {
+            sessionStorage.setItem('dashboardTransactions', JSON.stringify(localTransactions));
         }
         
         function updateTransactionsTable(transactions) {
@@ -940,8 +977,9 @@
                 
                 row.innerHTML = `
                     <td class="transaction-date">${txn.date}</td>
-                    <td class="transaction-description">${txn.description}${statusBadge}</td>
+                    <td class="transaction-description">${txn.description}</td>
                     <td>${txn.reference}</td>
+                    <td class="transaction-status-cell">${statusBadge}</td>
                     <td class="transaction-amount ${amountClass}">${amountSign}£${amount.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 `;
                 tbody.appendChild(row);
@@ -985,64 +1023,72 @@
         
         // Handle transfer form submission
         if (transferForm) {
-            transferForm.addEventListener('submit', async function(e) {
+            transferForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
                 const submitBtn = document.getElementById('submitTransferBtn');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Processing...';
                 
-                const transferData = {
-                    toAccount: document.getElementById('toAccount').value,
-                    amount: parseFloat(document.getElementById('amount').value),
-                    description: document.getElementById('description').value,
-                    reference: document.getElementById('reference').value
+                const toAccount = document.getElementById('toAccount').value;
+                const amount = parseFloat(document.getElementById('amount').value);
+                const description = document.getElementById('description').value || 'Transfer';
+                const reference = document.getElementById('reference').value;
+                
+                // Generate transaction ID
+                const txnId = 'TXN' + Date.now().toString().slice(-6);
+                
+                // Get current date
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                
+                // Create new transaction in processing state
+                const newTransaction = {
+                    id: txnId,
+                    date: dateStr,
+                    description: description,
+                    reference: reference || txnId,
+                    amount: -amount, // Negative for debit
+                    type: 'debit',
+                    status: 'processing',
+                    to_account: toAccount,
+                    timestamp: Date.now()
                 };
                 
-                try {
-                    const response = await fetch(`${API_BASE}/api/transfer`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(transferData)
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok && data.success) {
-                        // Close modal
-                        transferModal.style.display = 'none';
-                        transferForm.reset();
-                        
-                        // Reload transactions
-                        setTimeout(() => {
-                            loadTransactions();
-                        }, 1000);
-                        
-                        // Show success toast
-                        showToast('Your transfer has been initiated and is now processing', 'success', 'Transfer Initiated');
-                    } else {
-                        showToast(data.error || 'Failed to process transfer. Please try again.', 'error', 'Transfer Failed');
+                // Add to beginning of transactions array
+                localTransactions.unshift(newTransaction);
+                saveTransactions();
+                
+                // Close modal
+                transferModal.style.display = 'none';
+                transferForm.reset();
+                
+                // Reload transactions to show the new one
+                loadTransactions();
+                
+                // Show success toast
+                showToast('Your transfer has been initiated and is now processing', 'success', 'Transfer Initiated');
+                
+                // After 5 seconds, change status to pending
+                setTimeout(() => {
+                    const txn = localTransactions.find(t => t.id === txnId);
+                    if (txn) {
+                        txn.status = 'pending';
+                        txn.message = 'Transaction pending approval';
+                        saveTransactions();
+                        loadTransactions();
                     }
-                } catch (error) {
-                    console.error('Transfer error:', error);
-                    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                        showToast('Cannot connect to server. Please make sure the transactions API is running on port 5001.', 'error', 'Server Not Running');
-                    } else {
-                        showToast('Error processing transfer. Please check your connection and try again.', 'error', 'Connection Error');
-                    }
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Transfer Money';
-                }
+                }, 5000);
+                
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Transfer Money';
             });
         }
-        
-        // Poll for transaction updates
-        setInterval(() => {
-            loadTransactions();
-        }, 3000); // Check every 3 seconds
         
         // Initial load
         loadTransactions();
