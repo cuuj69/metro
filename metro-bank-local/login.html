@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <title>Metro Bank Online Banking</title>
+    
+    <link rel="icon" type="image/x-icon" href="./static/images/favicon-32x32.png">
+    
+    <link rel="preload" href="./static/assets/fonts/FTPolar-Semibold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="./static/assets/fonts/FTPolar-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="./static/assets/fonts/FTPolar-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="./css/fonts.css?v=3.4.0.24240">
+    <link href="./css/styles.css?v=3.4.0.24240" rel="stylesheet"/>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1e40af;
+            font-family: Polar, Verdana, Arial, sans-serif;
+            font-weight: 300;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .top-nav {
+            background-color: transparent;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+        .top-nav-logo {
+            position: absolute;
+            left: 30px;
+            top: 15px;
+        }
+        .top-nav-logo img {
+            height: 35px;
+            width: auto;
+        }
+        .top-nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .top-nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+        .top-nav a:hover {
+            text-decoration: underline;
+        }
+        /* Hide hamburger menu and mobile menu on desktop */
+        .hamburger-menu {
+            display: none;
+        }
+        .mobile-menu {
+            display: none !important;
+        }
+        /* Hide any header logos from external CSS */
+        .header-logo,
+        header .logo,
+        .header .logo {
+            display: none !important;
+        }
+        .login-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            min-height: calc(100vh - 200px);
+        }
+        .login-container {
+            width: 100%;
+            max-width: 380px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            padding: 35px 28px;
+        }
+        .login-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .login-logo {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-logo img {
+            height: 30px;
+            width: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .login-logo svg {
+            height: 30px;
+            width: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .login-logo .mbLogoRed {
+            fill: #e2091b;
+        }
+        .login-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #000d45;
+            margin: 0;
+            font-family: Polar, Verdana, Arial, sans-serif;
+            line-height: 1.3;
+            text-align: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .header-divider {
+            width: 100%;
+            height: 1px;
+            background-color: #ddd;
+            margin: 25px 0;
+        }
+        .register-link {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .register-link a {
+            color: #2548af;
+            text-decoration: underline;
+            font-size: 0.95rem;
+        }
+        .register-link a:hover {
+            color: #1c3785;
+        }
+        .login-form {
+            margin-top: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #000d45;
+            font-size: 0.95rem;
+            font-family: Polar, Verdana, Arial, sans-serif;
+        }
+        .help-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #2548af;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: help;
+            flex-shrink: 0;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            background: #fff;
+            color: #333;
+            font-family: Polar, Verdana, Arial, sans-serif;
+            transition: border-color 0.2s;
+        }
+        .form-group input.error,
+        .form-group input:invalid:not(:placeholder-shown) {
+            border-color: #d91c28;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #2548af;
+            box-shadow: 0 0 0 2px rgba(37, 72, 175, 0.1);
+        }
+        .form-group input.error:focus {
+            border-color: #d91c28;
+        }
+        .form-group input::placeholder {
+            color: #908a8a;
+        }
+        .form-help-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        .forgot-link {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .forgot-link a {
+            color: #2548af;
+            text-decoration: underline;
+            font-size: 0.9rem;
+        }
+        .forgot-link a:hover {
+            color: #1c3785;
+        }
+        .remember-me {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .remember-me input[type="checkbox"] {
+            margin-top: 3px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .remember-me label {
+            font-size: 0.9rem;
+            color: #333;
+            font-weight: 300;
+            cursor: pointer;
+            line-height: 1.4;
+            margin: 0;
+        }
+        .error-message {
+            color: #d91c28;
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            margin-top: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            font-style: italic;
+        }
+        .btn-continue {
+            width: 100%;
+            padding: 12px 24px;
+            background-color: #2548af;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: Polar, Verdana, Arial, sans-serif;
+            transition: all 0.2s ease;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: none;
+            letter-spacing: 0.3px;
+        }
+        .btn-continue:hover {
+            background-color: #1c3785;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(37, 72, 175, 0.3);
+        }
+        .btn-continue:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(37, 72, 175, 0.2);
+        }
+        .btn-continue:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .footer {
+            width: 100%;
+            margin-top: auto;
+            padding: 0;
+        }
+        .footer-legal {
+            background-color: #fff;
+            color: #333;
+            padding: 40px 20px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            text-align: left;
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .footer-legal p {
+            color: #333;
+            margin: 0 0 15px 0;
+            font-size: 0.875rem;
+        }
+        .footer-legal p a {
+            color: #333;
+            text-decoration: underline;
+        }
+        .footer-legal p a:hover {
+            color: #2548af;
+        }
+        .footer-links {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e5e5;
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .footer-links span {
+            color: #333;
+            font-size: 0.875rem;
+        }
+        .footer-links a {
+            color: #333;
+            text-decoration: underline;
+            font-size: 0.875rem;
+        }
+        .footer-links a:hover {
+            color: #2548af;
+        }
+        .fscs-logo {
+            margin-left: auto;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fscs-logo img {
+            width: 100%;
+            height: auto;
+            max-width: 50px;
+        }
+        @media (max-width: 768px) {
+            .login-wrapper {
+                padding: 20px 15px;
+                min-height: calc(100vh - 150px);
+            }
+            .login-container {
+                width: 80%;
+                max-width: 80%;
+                padding: 1.5em 1.5em;
+                margin: 0 auto;
+            }
+            .login-header {
+                margin-bottom: 25px;
+            }
+            .login-header h1 {
+                font-size: 1.3rem;
+                line-height: 1.4;
+            }
+            .login-logo img,
+            .login-logo svg {
+                height: 28px;
+            }
+            .header-divider {
+                margin: 20px 0;
+            }
+            .top-nav {
+                padding: 12px 15px;
+                justify-content: space-between;
+            }
+            .top-nav-logo {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                margin-bottom: 0;
+            }
+            .top-nav-logo img {
+                height: 30px;
+            }
+            .top-nav-links {
+                display: none;
+            }
+            .hamburger-menu {
+                display: flex;
+                position: absolute;
+                left: 15px;
+                top: 12px;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 5px;
+                flex-direction: column;
+                gap: 4px;
+                align-items: center;
+                justify-content: center;
+            }
+            .hamburger-menu span {
+                display: block;
+                width: 24px;
+                height: 2px;
+                background-color: #fff;
+                border-radius: 2px;
+                transition: all 0.3s ease;
+            }
+            .mobile-menu {
+                display: none;
+                width: 100%;
+                background-color: transparent;
+            }
+            .mobile-menu.active {
+                display: block !important;
+            }
+            .mobile-menu-separator {
+                width: 100%;
+                height: 1px;
+                background-color: rgba(255, 255, 255, 0.3);
+                margin: 25px 0 20px 0;
+            }
+            .mobile-menu-content {
+                padding: 0;
+            }
+            .mobile-menu-links {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                width: 100%;
+                padding: 0 15px;
+                align-items: center;
+            }
+            .mobile-menu-links a {
+                color: #fff !important;
+                text-decoration: none !important;
+                font-size: 1.1rem !important;
+                font-weight: 400 !important;
+                padding: 15px 0 !important;
+                display: block !important;
+                width: 100% !important;
+                text-align: center !important;
+                font-family: Polar, Verdana, Arial, sans-serif !important;
+            }
+            .mobile-menu-links a:hover {
+                color: #2548af !important;
+            }
+            .hamburger-menu.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            .hamburger-menu.active span:nth-child(2) {
+                opacity: 0;
+            }
+            .hamburger-menu.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+            .form-group {
+                margin-bottom: 18px;
+            }
+            .form-group input[type="text"],
+            .form-group input[type="password"] {
+                padding: 14px 15px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            .btn-continue {
+                padding: 14px 24px;
+                min-height: 48px; /* Better touch target */
+                font-size: 1rem;
+            }
+            .footer-legal {
+                padding: 30px 15px;
+            }
+            .footer-content {
+                padding: 0;
+            }
+            .footer-links {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .fscs-logo {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+        @media (max-width: 480px) {
+            .login-wrapper {
+                padding: 15px 10px;
+            }
+            .login-container {
+                width: 80%;
+                max-width: 80%;
+                padding: 0.6em 0.6em;
+                border-radius: 1px;
+            }
+            .login-header h1 {
+                font-size: 1.2rem;
+            }
+            .login-logo img,
+            .login-logo svg {
+                height: 25px;
+            }
+            .top-nav {
+                padding: 10px 12px;
+            }
+            .top-nav-logo {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .top-nav-logo img {
+                height: 28px;
+            }
+            .hamburger-menu {
+                left: 12px;
+                top: 10px;
+            }
+            .hamburger-menu span {
+                width: 22px;
+            }
+            .register-link a {
+                font-size: 0.9rem;
+            }
+            .form-group label {
+                font-size: 0.9rem;
+            }
+            .form-help-text {
+                font-size: 0.8rem;
+            }
+            .forgot-link a {
+                font-size: 0.85rem;
+            }
+            .remember-me label {
+                font-size: 0.85rem;
+            }
+            .footer-legal {
+                padding: 25px 12px;
+                font-size: 0.8rem;
+            }
+            .footer-legal p {
+                font-size: 0.8rem;
+            }
+            .footer-links span,
+            .footer-links a {
+                font-size: 0.8rem;
+            }
+        }
+        @media (max-width: 320px) {
+            .login-container {
+                padding: 20px 15px;
+            }
+            .login-header h1 {
+                font-size: 1.1rem;
+            }
+            .top-nav-links {
+                gap: 10px;
+            }
+            .top-nav a {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <div class="top-nav-logo">
+            <a href="./index.html">
+                <img src="./static/images/metrobank-logo.png" alt="Metro Bank Logo">
+            </a>
+        </div>
+        <div class="top-nav-links">
+            <a href="./index.html">Home</a>
+            <a href="#">Stay Safe Online</a>
+            <a href="#">Service Quality Metrics</a>
+        </div>
+        <button class="hamburger-menu" id="hamburgerBtn" aria-label="Menu" type="button">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+    
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-separator"></div>
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-links">
+                <a href="./index.html">Home</a>
+                <a href="#">Stay Safe Online</a>
+                <a href="#">Service Quality Metrics</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">
+                    <img src="./static/images/metrobank-logo.png" alt="Metro Bank Logo" class="logo-img">
+                </div>
+                <h1 class="login-title">Welcome to Metro Bank Online Banking</h1>
+            </div>
+            
+            <div class="header-divider"></div>
+            
+            <div class="register-link">
+                <a href="#">Register for online banking</a>
+            </div>
+            
+            <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="customerNumber">
+                        Enter your 12-digit customer number or username
+                        <span class="help-icon" title="Help">?</span>
+                    </label>
+                    <input type="text" id="customerNumber" name="customerNumber" required autocomplete="username" placeholder="Enter your customer number or username">
+                    <div class="form-help-text">(Your customer number should only include numbers)</div>
+                    <div class="error-message" id="errorMessage">
+                        Please enter your 12-digit customer number or username.
+                    </div>
+                </div>
+                
+                <div class="forgot-link">
+                    <a href="#">Forgotten your customer number or username?</a>
+                </div>
+                
+                <div class="remember-me">
+                    <input type="checkbox" id="rememberMe" name="rememberMe">
+                    <label for="rememberMe">Remember me (Don't tick if you are on a shared computer)</label>
+                </div>
+                
+                <button type="submit" class="btn-continue">Continue</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="footer-legal">
+            <div class="footer-content">
+                <p>Your eligible deposits with Metro Bank PLC are protected up to a total of £85,000 by the Financial Services Compensation Scheme, the UK's deposit guarantee scheme. Any deposits you hold above the limit are unlikely to be covered. For further information visit <a href="http://www.fscs.org.uk" target="_blank" title="FSCS Website">www.fscs.org.uk</a>.</p>
+                <p>Metro Bank PLC. Registered in England and Wales. Company number: 6419578. Registered office: One Southampton Row, London, WC1B 5HA. We are authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and Prudential Regulation Authority. Metro Bank PLC is an independent UK Bank - it is not affiliated with any other bank or organisation (including the METRO newspaper or its publishers) anywhere in the world. "Metrobank" is the registered trademark of Metro Bank PLC.</p>
+                <div class="footer-links">
+                    <span>Copyright 2020 Metro Bank. All rights reserved.</span>
+                    <a href="#">Accessibility</a>
+                    <a href="#">Legal Information</a>
+                    <a href="#">Privacy and Security</a>
+                    <a href="#">SiteMap</a>
+                    <div class="fscs-logo">
+                        <img src="./globalassets/fscs-logo.png" alt="FSCS logo">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Check if already logged in
+        if (sessionStorage.getItem('loggedIn') === 'true') {
+            window.location.href = './dashboard.html';
+        }
+        
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const customerNumber = document.getElementById('customerNumber').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Simple static login - accept any input
+            // In a real application, this would validate against a backend
+            const customerNumberInput = document.getElementById('customerNumber');
+            
+            if (customerNumber && customerNumber.trim().length > 0) {
+                // Remove error state
+                customerNumberInput.classList.remove('error');
+                errorMessage.style.display = 'none';
+                
+                // Set session
+                sessionStorage.setItem('loggedIn', 'true');
+                sessionStorage.setItem('userEmail', customerNumber);
+                sessionStorage.setItem('customerNumber', customerNumber);
+                
+                // Redirect to dashboard
+                window.location.href = './dashboard.html';
+            } else {
+                // Show error state
+                customerNumberInput.classList.add('error');
+                errorMessage.style.display = 'block';
+            }
+        }
+        
+        // Format customer number input (numbers only if it's all numbers)
+        document.addEventListener('DOMContentLoaded', function() {
+            const customerNumberInput = document.getElementById('customerNumber');
+            
+            if (customerNumberInput) {
+                customerNumberInput.addEventListener('input', function(e) {
+                    const value = e.target.value;
+                    // Allow both numbers and letters (for username)
+                    // If user types only numbers, validate as customer number
+                });
+            }
+            
+            // Mobile menu toggle
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (hamburgerBtn && mobileMenu) {
+                hamburgerBtn.addEventListener('click', function() {
+                    if (mobileMenu.classList.contains('active')) {
+                        mobileMenu.classList.remove('active');
+                        hamburgerBtn.classList.remove('active');
+                    } else {
+                        mobileMenu.classList.add('active');
+                        hamburgerBtn.classList.add('active');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
