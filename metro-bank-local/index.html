@@ -712,10 +712,10 @@ fieldset.phoneChecker-body.js-hide{
         </div>
 
     <div class="login">
-        <a href="./login.html" id="loginLink" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-            <span class="text">Log in</span>
+        <a href="./login.html" id="loginLink" style="text-decoration: none; color: #fff; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <span class="text" style="color: #fff;">Log in</span>
             <span class="login-icon" style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex-shrink: 0; position: relative; overflow: visible;">
-                <svg width="16" height="16" viewBox="-2 -2 19 13" style="display: block; width: 16px; height: 16px; position: relative; pointer-events: none; fill: currentColor;">
+                <svg width="16" height="16" viewBox="-2 -2 19 13" style="display: block; width: 16px; height: 16px; position: relative; pointer-events: none; fill: #fff;">
                     <use xlink:href="#svg-arrow-down"></use>
                 </svg>
             </span>
@@ -723,7 +723,11 @@ fieldset.phoneChecker-body.js-hide{
     </div>
     
     <style>
-        /* Override any external CSS that might affect the login icon */
+        /* Override any external CSS that might affect the login link and icon */
+        #loginLink,
+        #loginLink .text {
+            color: #fff !important;
+        }
         #loginLink .login-icon,
         .login .login-icon {
             display: inline-flex !important;
@@ -742,7 +746,7 @@ fieldset.phoneChecker-body.js-hide{
             display: block !important;
             position: relative !important;
             pointer-events: none !important;
-            fill: currentColor !important;
+            fill: #fff !important;
         }
     </style>
 

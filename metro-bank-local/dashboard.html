@@ -1224,7 +1224,7 @@
         loadTransactions();
         
         // Toast Notification System
-        function showToast(message, type = 'info', title = '') {
+        function showToast(message, type = 'info', title = '', showIcon = true) {
             const container = document.getElementById('toastContainer');
             if (!container) return;
             
@@ -1247,7 +1247,7 @@
             };
             
             toast.innerHTML = `
-                <span class="toast-icon">${icons[type] || icons.info}</span>
+                ${showIcon ? `<span class="toast-icon">${icons[type] || icons.info}</span>` : ''}
                 <div class="toast-content">
                     ${title ? `<div class="toast-title">${title}</div>` : ''}
                     <div class="toast-message">${message}</div>
@@ -1274,7 +1274,6 @@
             const confirmToast = document.createElement('div');
             confirmToast.className = 'toast info';
             confirmToast.innerHTML = `
-                <span class="toast-icon">ℹ</span>
                 <div class="toast-content">
                     <div class="toast-title">Confirm Logout</div>
                     <div class="toast-message">Are you sure you want to log out?</div>
@@ -1293,7 +1292,7 @@
                 sessionStorage.removeItem('userEmail');
             sessionStorage.removeItem('customerNumber');
             sessionStorage.removeItem('userName');
-            showToast('You have been logged out successfully', 'success', 'Logged Out');
+            showToast('You have been logged out successfully', 'success', 'Logged Out', false);
             setTimeout(() => {
                 window.location.href = './index.html';
             }, 1000);
