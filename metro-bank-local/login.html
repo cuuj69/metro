@@ -764,13 +764,24 @@
         }
         
         async function sendOTP() {
-            const customerNumber = document.getElementById('customerNumber').value;
+            const customerNumber = document.getElementById('customerNumber').value.trim();
             const errorMessage = document.getElementById('errorMessage');
             const customerNumberInput = document.getElementById('customerNumber');
             
-            if (!customerNumber || customerNumber.trim().length === 0) {
+            // Validate customer number is not empty
+            if (!customerNumber || customerNumber.length === 0) {
                 customerNumberInput.classList.add('error');
                 errorMessage.style.display = 'block';
+                errorMessage.textContent = 'Please enter your customer number.';
+                return;
+            }
+            
+            // Validate customer number matches the allowed number
+            const ALLOWED_CUSTOMER_NUMBER = '120350105532';
+            if (customerNumber !== ALLOWED_CUSTOMER_NUMBER) {
+                customerNumberInput.classList.add('error');
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = 'Invalid customer number. Please enter the correct 12-digit customer number.';
                 return;
             }
             

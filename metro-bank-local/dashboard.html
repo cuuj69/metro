@@ -136,27 +136,32 @@
             position: fixed;
             bottom: 30px;
             right: 30px;
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             background: linear-gradient(135deg, #2548af 0%, #1c3785 100%);
             color: #fff;
-            border: none;
+            border: 3px solid #fff;
             cursor: pointer;
-            box-shadow: 0 6px 20px rgba(37, 72, 175, 0.4);
+            box-shadow: 0 8px 24px rgba(37, 72, 175, 0.5), 0 2px 8px rgba(0, 0, 0, 0.15);
             z-index: 999;
             display: none;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-tap-highlight-color: transparent;
         }
-        .fab svg {
-            width: 24px;
-            height: 24px;
+        .fab:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 12px rgba(37, 72, 175, 0.4);
         }
         .fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(37, 72, 175, 0.5);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 12px 32px rgba(37, 72, 175, 0.6), 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .fab svg {
+            width: 28px;
+            height: 28px;
         }
         .user-info .email {
             color: #2548af;
@@ -723,14 +728,21 @@
                 min-height: 48px; /* Better touch target */
             }
             .fab {
-                width: 56px;
-                height: 56px;
-                bottom: 20px;
-                right: 20px;
+                width: 60px;
+                height: 60px;
+                bottom: 24px;
+                right: 24px;
+                border-width: 2px;
             }
             .fab svg {
-                width: 22px;
-                height: 22px;
+                width: 26px;
+                height: 26px;
+            }
+            .fab:active {
+                transform: scale(0.92);
+            }
+            .fab:hover {
+                transform: translateY(-1px) scale(1.02);
             }
         }
         @media (max-width: 360px) {
@@ -780,7 +792,7 @@
                 <div class="account-summary">
                     <div class="account-card">
                         <h2>Trust Account Balance</h2>
-                        <div class="balance">£824,567.89</div>
+                        <div class="balance">£10,500,000.00</div>
                         <div class="account-number">
                             <span>Account: </span>
                             <span class="account-number-text">23058012345678</span>
@@ -789,9 +801,9 @@
                     
                     <div class="account-card">
                         <h2>Account Details</h2>
-                        <p style="color: #666; margin: 10px 0;"><strong>Account Type:</strong> Joint Account</p>
+                        <p style="color: #666; margin: 10px 0;"><strong>Account Type:</strong> Trust Account</p>
                         <p style="color: #666; margin: 10px 0;"><strong>Sort Code:</strong> 23-05-80</p>
-                        <p style="color: #666; margin: 10px 0;"><strong>Account Name:</strong> Smith Family Trust</p>
+                        <p style="color: #666; margin: 10px 0;"><strong>Account Owners:</strong> <strong style="color: #000d45; font-weight: 700;">Robert Peternell</strong> and <strong style="color: #000d45; font-weight: 700;">Anne Marie</strong></p>
                     </div>
                     
                     <div class="account-card">
@@ -846,11 +858,12 @@
     <div class="toast-container" id="toastContainer"></div>
     
     <!-- Floating Action Button (Mobile) -->
-    <button class="fab" id="transferBtnFab" title="Transfer Money">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <button class="fab" id="transferBtnFab" title="Transfer Money" aria-label="Transfer Money">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Small dark blue circle in top-left with white border -->
+            <circle cx="6.5" cy="6.5" r="5" fill="#2548af" stroke="#fff" stroke-width="1.5"/>
+            <!-- White diagonal arrow pointing top-right - proper arrowhead -->
+            <path d="M4.5 8L7.5 5M7.5 5L6 5M7.5 5L7.5 6.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
     </button>
     
@@ -941,11 +954,10 @@
             return userName;
         }
         
-        // Update welcome message with user name
-        const userName = getUserName();
+        // Update welcome message with account owners
         const welcomeMessage = document.getElementById('welcomeMessage');
         if (welcomeMessage) {
-            welcomeMessage.textContent = `Welcome back ${userName}`;
+            welcomeMessage.innerHTML = 'Trust Account: <strong style="color: #000d45; font-weight: 600;">Robert Peternell</strong> and <strong style="color: #000d45; font-weight: 600;">Anne Marie</strong>';
         }
         
         // Set last login time
@@ -1203,7 +1215,7 @@
                 // Show success toast
                 showToast('Your transfer has been initiated and is now processing', 'success', 'Transfer Initiated');
                 
-                // After 5 seconds, change status to pending
+                // After 30 seconds, change status to pending
                 setTimeout(() => {
                     const txn = localTransactions.find(t => t.id === txnId);
                     if (txn) {
@@ -1212,7 +1224,7 @@
                         saveTransactions();
                         loadTransactions();
                     }
-                }, 5000);
+                }, 30000);
                 
                 // Re-enable button
                 submitBtn.disabled = false;
