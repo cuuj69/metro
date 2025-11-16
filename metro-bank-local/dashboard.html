@@ -122,6 +122,33 @@
         .user-info {
             text-align: right;
         }
+        /* Floating Action Button for Mobile */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2548af 0%, #1c3785 100%);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(37, 72, 175, 0.4);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .fab svg {
+            width: 24px;
+            height: 24px;
+        }
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(37, 72, 175, 0.5);
+        }
         .user-info .email {
             color: #2548af;
             font-size: 0.9rem;
@@ -521,6 +548,9 @@
                 align-items: flex-start;
                 gap: 15px;
             }
+            .fab {
+                display: flex;
+            }
             .dashboard-header h1 {
                 font-size: 1.5rem;
             }
@@ -741,6 +771,15 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
     
+    <!-- Floating Action Button (Mobile) -->
+    <button class="fab" id="transferBtnFab" title="Transfer Money">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
+    
     <!-- Transfer Modal -->
     <div id="transferModal" class="modal">
         <div class="modal-content">
@@ -909,17 +948,26 @@
             });
         }
         
-        // Transfer Modal
+        // Transfer Modal - Multiple buttons can open it
+        function openTransferModal() {
+            const transferModal = document.getElementById('transferModal');
+            if (transferModal) {
+                transferModal.style.display = 'block';
+            }
+        }
+        
         const transferBtn = document.getElementById('transferBtn');
+        const transferBtnFab = document.getElementById('transferBtnFab');
         const transferModal = document.getElementById('transferModal');
         const closeModal = document.getElementById('closeModal');
         const transferForm = document.getElementById('transferForm');
         
-        if (transferBtn) {
-            transferBtn.addEventListener('click', function() {
-                transferModal.style.display = 'block';
-            });
-        }
+        // Add event listeners to all transfer buttons
+        [transferBtn, transferBtnFab].forEach(btn => {
+            if (btn) {
+                btn.addEventListener('click', openTransferModal);
+            }
+        });
         
         if (closeModal) {
             closeModal.addEventListener('click', function() {
@@ -1065,8 +1113,8 @@
         }
         
         function performLogout() {
-            sessionStorage.removeItem('loggedIn');
-            sessionStorage.removeItem('userEmail');
+                sessionStorage.removeItem('loggedIn');
+                sessionStorage.removeItem('userEmail');
             sessionStorage.removeItem('customerNumber');
             sessionStorage.removeItem('userName');
             showToast('You have been logged out successfully', 'success', 'Logged Out');
