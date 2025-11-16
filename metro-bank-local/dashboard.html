@@ -160,6 +160,10 @@
             font-size: 0.9rem;
             margin-top: 10px;
         }
+        .account-number-text {
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
         .transactions-section {
             background: #fff;
             padding: 25px;
@@ -235,6 +239,17 @@
             color: #666;
             font-size: 0.9rem;
         }
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                padding: 15px;
+            }
+            .account-summary {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            .quick-actions {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
         @media (max-width: 768px) {
             .dashboard-container {
                 padding: 15px;
@@ -244,21 +259,72 @@
                 align-items: flex-start;
                 gap: 15px;
             }
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+            }
             .user-info {
                 text-align: left;
                 width: 100%;
             }
             .account-summary {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .account-card {
+                padding: 20px;
+            }
+            .balance {
+                font-size: 2rem;
             }
             .transactions-section {
                 overflow-x: auto;
+                padding: 20px;
             }
             .transactions-table {
                 min-width: 600px;
             }
             .container {
                 padding: 10px;
+            }
+            .quick-actions {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .action-card {
+                padding: 15px;
+            }
+            .dashboard-logo {
+                width: 150px;
+            }
+        }
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+            .dashboard-header {
+                padding: 15px;
+            }
+            .dashboard-header h1 {
+                font-size: 1.3rem;
+            }
+            .balance {
+                font-size: 1.8rem;
+            }
+            .account-card {
+                padding: 15px;
+            }
+            .transactions-section {
+                padding: 15px;
+            }
+            .transactions-table {
+                font-size: 0.85rem;
+            }
+            .transactions-table th,
+            .transactions-table td {
+                padding: 8px;
+            }
+            .dashboard-logo {
+                width: 120px;
             }
         }
     </style>
@@ -279,7 +345,7 @@
                 <div class="dashboard-header">
                     <div>
                         <h1>Trust Account Dashboard</h1>
-                        <p style="color: #666; margin: 5px 0 0 0;">Welcome back</p>
+                        <p style="color: #666; margin: 5px 0 0 0;" id="welcomeMessage">Welcome back</p>
                     </div>
                     <div class="user-info">
                         <div class="email" id="userEmail"></div>
@@ -291,8 +357,10 @@
                     <div class="account-card">
                         <h2>Trust Account Balance</h2>
                         <div class="balance">£824,567.89</div>
-                        <div class="account-number">Account: ****1234</div>
-                        <p style="color: #666; margin-top: 10px; font-size: 0.9rem;">Available balance</p>
+                        <div class="account-number">
+                            <span>Account: </span>
+                            <span class="account-number-text">23058012345678</span>
+                        </div>
                     </div>
                     
                     <div class="account-card">
@@ -447,6 +515,32 @@
             document.getElementById('userEmail').textContent = userEmail;
         }
         
+        // Get or set user name
+        function getUserName() {
+            let userName = sessionStorage.getItem('userName');
+            if (!userName) {
+                // Extract name from email or use default
+                const email = sessionStorage.getItem('userEmail') || '';
+                if (email.includes('@')) {
+                    const emailName = email.split('@')[0];
+                    // Capitalize first letter
+                    userName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+                } else {
+                    // Default name
+                    userName = 'Avraham';
+                }
+                sessionStorage.setItem('userName', userName);
+            }
+            return userName;
+        }
+        
+        // Update welcome message with user name
+        const userName = getUserName();
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        if (welcomeMessage) {
+            welcomeMessage.textContent = `Welcome back ${userName}`;
+        }
+        
         // Set last login time
         const lastLogin = new Date().toLocaleString('en-GB', {
             day: 'numeric',
@@ -476,6 +570,7 @@
                 handleLogout();
             });
         }
+        
     </script>
 </body>
 </html>
