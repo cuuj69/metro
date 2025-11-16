@@ -742,10 +742,18 @@
         }
         
         // API base URL - change this to your Vercel deployment URL
-        const API_BASE = 'http://localhost:5000'; // For local development
-        // const API_BASE = 'https://your-vercel-app.vercel.app'; // For production
+        // For Netlify deployment - client-side OTP simulation
+        // In production, replace this with actual API calls to your backend
+        const API_BASE = 'http://localhost:5000'; // For local development with backend
+        const USE_BACKEND = false; // Set to false for Netlify (client-side only)
         
         let currentCustomerNumber = '';
+        let currentOTP = '';
+        
+        // Generate a 6-digit OTP
+        function generateOTP() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
         
         async function sendOTP() {
             const customerNumber = document.getElementById('customerNumber').value;
@@ -768,39 +776,66 @@
                 sendOtpBtn.disabled = true;
                 sendOtpBtn.textContent = 'Sending...';
                 
-                // Call API to send OTP
-                const response = await fetch(`${API_BASE}/api/send-otp`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: customerNumber,
-                        customerNumber: customerNumber
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    // Store customer number
-                    currentCustomerNumber = customerNumber;
-                    
-                    // Switch to OTP form
-                    document.getElementById('loginForm').style.display = 'none';
-                    document.getElementById('otpForm').style.display = 'block';
-                    
-                    // Focus on OTP input
-                    document.getElementById('otpCode').focus();
-                } else {
-                    // Fallback: if API fails, allow login without OTP (for demo)
-                    console.warn('OTP API failed, allowing direct login:', data);
-                    completeLogin(customerNumber);
+                if (USE_BACKEND) {
+                    // Try to call backend API
+                    try {
+                        const response = await fetch(`${API_BASE}/api/send-otp`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: customerNumber,
+                                customerNumber: customerNumber
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.success) {
+                            currentOTP = data.otp || generateOTP();
+                            currentCustomerNumber = customerNumber;
+                            sessionStorage.setItem('currentOTP', currentOTP);
+                            sessionStorage.setItem('otpExpiry', Date.now() + 600000); // 10 minutes
+                            
+                            document.getElementById('loginForm').style.display = 'none';
+                            document.getElementById('otpForm').style.display = 'block';
+                            document.getElementById('otpCode').focus();
+                            sendOtpBtn.disabled = false;
+                            sendOtpBtn.textContent = 'Continue';
+                            return;
+                        }
+                    } catch (apiError) {
+                        console.warn('Backend API not available, using client-side OTP');
+                    }
                 }
+                
+                // Client-side OTP generation (for Netlify)
+                currentOTP = generateOTP();
+                currentCustomerNumber = customerNumber;
+                
+                // Store OTP in sessionStorage with 10-minute expiry
+                sessionStorage.setItem('currentOTP', currentOTP);
+                sessionStorage.setItem('otpExpiry', Date.now() + 600000); // 10 minutes
+                sessionStorage.setItem('customerNumber', customerNumber);
+                
+                // Log OTP to console for demo purposes (remove in production)
+                console.log('OTP for', customerNumber, ':', currentOTP);
+                
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Switch to OTP form
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('otpForm').style.display = 'block';
+                
+                // Focus on OTP input
+                document.getElementById('otpCode').focus();
+                
             } catch (error) {
                 console.error('Error sending OTP:', error);
-                // Fallback: allow login without OTP (for demo)
-                completeLogin(customerNumber);
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = 'An error occurred. Please try again.';
             } finally {
                 const sendOtpBtn = document.getElementById('sendOtpBtn');
                 sendOtpBtn.disabled = false;
@@ -825,44 +860,90 @@
                 verifyOtpBtn.disabled = true;
                 verifyOtpBtn.textContent = 'Verifying...';
                 
-                const response = await fetch(`${API_BASE}/api/verify-otp`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: currentCustomerNumber,
-                        customerNumber: currentCustomerNumber,
-                        otp: otpCode
-                    })
-                });
+                if (USE_BACKEND) {
+                    // Try to call backend API
+                    try {
+                        const response = await fetch(`${API_BASE}/api/verify-otp`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: currentCustomerNumber,
+                                customerNumber: currentCustomerNumber,
+                                otp: otpCode
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.success) {
+                            completeLogin(currentCustomerNumber);
+                            return;
+                        } else {
+                            otpInput.classList.add('error');
+                            otpErrorMessage.style.display = 'block';
+                            otpErrorMessage.textContent = data.error || 'Invalid or expired code';
+                            verifyOtpBtn.disabled = false;
+                            verifyOtpBtn.textContent = 'Verify & Login';
+                            return;
+                        }
+                    } catch (apiError) {
+                        console.warn('Backend API not available, using client-side verification');
+                    }
+                }
                 
-                const data = await response.json();
+                // Client-side OTP verification (for Netlify)
+                const storedOTP = sessionStorage.getItem('currentOTP');
+                const otpExpiry = sessionStorage.getItem('otpExpiry');
+                const storedCustomerNumber = sessionStorage.getItem('customerNumber');
                 
-                if (response.ok && data.success) {
+                // Check if OTP exists and hasn't expired
+                if (!storedOTP || !otpExpiry || Date.now() > parseInt(otpExpiry)) {
+                    otpInput.classList.add('error');
+                    otpErrorMessage.style.display = 'block';
+                    otpErrorMessage.textContent = 'OTP has expired. Please request a new code.';
+                    verifyOtpBtn.disabled = false;
+                    verifyOtpBtn.textContent = 'Verify & Login';
+                    return;
+                }
+                
+                // Verify OTP
+                if (otpCode === storedOTP && storedCustomerNumber === currentCustomerNumber) {
+                    // Clear OTP from storage
+                    sessionStorage.removeItem('currentOTP');
+                    sessionStorage.removeItem('otpExpiry');
+                    
+                    // Simulate API delay
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
                     // OTP verified, complete login
                     completeLogin(currentCustomerNumber);
                 } else {
+                    // Invalid OTP
                     otpInput.classList.add('error');
                     otpErrorMessage.style.display = 'block';
-                    otpErrorMessage.textContent = data.error || 'Invalid or expired code';
+                    otpErrorMessage.textContent = 'Invalid code. Please try again.';
                 }
             } catch (error) {
                 console.error('Error verifying OTP:', error);
-                // Fallback: allow login (for demo)
-                completeLogin(currentCustomerNumber);
+                otpInput.classList.add('error');
+                otpErrorMessage.style.display = 'block';
+                otpErrorMessage.textContent = 'An error occurred. Please try again.';
             } finally {
                 const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-                verifyOtpBtn.disabled = false;
-                verifyOtpBtn.textContent = 'Verify & Login';
+                if (verifyOtpBtn && verifyOtpBtn.disabled) {
+                    verifyOtpBtn.disabled = false;
+                    verifyOtpBtn.textContent = 'Verify & Login';
+                }
             }
         }
         
         function completeLogin(customerNumber) {
-            sessionStorage.setItem('loggedIn', 'true');
-            sessionStorage.setItem('userEmail', customerNumber);
-            sessionStorage.setItem('customerNumber', customerNumber);
-            window.location.href = './dashboard.html';
+                sessionStorage.setItem('loggedIn', 'true');
+                sessionStorage.setItem('userEmail', customerNumber);
+                sessionStorage.setItem('customerNumber', customerNumber);
+                window.location.href = './dashboard.html';
         }
         
         function handleLogin(event) {
