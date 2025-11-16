@@ -142,6 +142,41 @@ margin-top: -12px;
 top: 95px;
 }
 }
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+    body {
+        -webkit-text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+    }
+    /* Ensure touch-friendly targets */
+    a, button {
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    /* Better scrolling */
+    * {
+        -webkit-overflow-scrolling: touch;
+    }
+    /* Prevent horizontal scroll */
+    html, body {
+        overflow-x: hidden;
+        width: 100%;
+    }
+}
+@media (max-width: 480px) {
+    /* Cookie consent mobile optimization */
+    #cookieConsentNotice {
+        padding: 15px !important;
+        font-size: 13px !important;
+    }
+    #cookieConsentNotice button {
+        min-width: 120px !important;
+        padding: 10px 16px !important;
+    }
+}
 </style>      
 
 <style>

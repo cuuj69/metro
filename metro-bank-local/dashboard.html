@@ -44,12 +44,17 @@
             padding: 0;
             background-color: #f5f6f8;
             font-family: 'Polar', Verdana, Arial, sans-serif;
+            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
         .container {
             min-height: 100vh;
             padding: 0;
             box-sizing: border-box;
             background-color: #f5f6f8;
+            width: 100%;
+            overflow-x: hidden;
         }
         /* Logo container - clean and simple */
         .dashboard-logo-container {
@@ -240,6 +245,8 @@
             width: 90%;
             max-width: 500px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            -webkit-overflow-scrolling: touch;
         }
         .modal-header {
             display: flex;
@@ -565,6 +572,10 @@
             .quick-actions {
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
+            .modal-content {
+                width: 85%;
+                padding: 25px;
+            }
         }
         @media (max-width: 768px) {
             .dashboard-container {
@@ -598,9 +609,14 @@
             .transactions-section {
                 overflow-x: auto;
                 padding: 20px;
+                -webkit-overflow-scrolling: touch;
             }
             .transactions-table {
                 min-width: 600px;
+            }
+            .modal-content {
+                width: 90%;
+                margin: 5% auto;
             }
             .container {
                 padding: 10px;
@@ -620,11 +636,28 @@
             .dashboard-container {
                 padding: 10px;
             }
+            .dashboard-logo-container {
+                padding: 15px 0;
+                margin-bottom: 20px;
+            }
             .dashboard-header {
                 padding: 15px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
             }
             .dashboard-header h1 {
                 font-size: 1.3rem;
+            }
+            .user-info {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .btn-logout {
+                width: 100%;
+                padding: 12px;
             }
             .balance {
                 font-size: 1.8rem;
@@ -632,18 +665,90 @@
             .account-card {
                 padding: 15px;
             }
+            .account-card h2 {
+                font-size: 1.1rem;
+            }
             .transactions-section {
                 padding: 15px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
             .transactions-table {
-                font-size: 0.85rem;
+                font-size: 0.8rem;
+                min-width: 650px;
             }
             .transactions-table th,
             .transactions-table td {
-                padding: 8px;
+                padding: 8px 6px;
+                white-space: nowrap;
+            }
+            .transaction-status {
+                font-size: 0.7rem;
+                padding: 4px 8px;
+                min-width: 70px;
+            }
+            .quick-actions {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .action-card {
+                padding: 15px;
+            }
+            .action-card h3 {
+                font-size: 1rem;
             }
             .dashboard-logo {
                 width: 120px;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 20px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+            .form-group-modal {
+                margin-bottom: 18px;
+            }
+            .form-group-modal input {
+                padding: 12px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            .btn-submit-transfer {
+                padding: 14px;
+                font-size: 1rem;
+                min-height: 48px; /* Better touch target */
+            }
+            .fab {
+                width: 56px;
+                height: 56px;
+                bottom: 20px;
+                right: 20px;
+            }
+            .fab svg {
+                width: 22px;
+                height: 22px;
+            }
+        }
+        @media (max-width: 360px) {
+            .dashboard-logo {
+                width: 100px;
+            }
+            .dashboard-header h1 {
+                font-size: 1.1rem;
+            }
+            .balance {
+                font-size: 1.5rem;
+            }
+            .transactions-table {
+                font-size: 0.75rem;
+            }
+            .transactions-table th,
+            .transactions-table td {
+                padding: 6px 4px;
             }
         }
     </style>
