@@ -164,6 +164,114 @@
             font-family: monospace;
             letter-spacing: 1px;
         }
+        /* Transfer Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow: auto;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: #ed1c24;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-modal:hover {
+            color: #ed1c24;
+        }
+        .form-group-modal {
+            margin-bottom: 20px;
+        }
+        .form-group-modal label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group-modal input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .form-group-modal input:focus {
+            outline: none;
+            border-color: #2548af;
+        }
+        .btn-submit-transfer {
+            width: 100%;
+            padding: 12px;
+            background-color: #ed1c24;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-submit-transfer:hover {
+            background-color: #c4161d;
+        }
+        .btn-submit-transfer:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .transaction-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .status-processing {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-pending {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
         .transactions-section {
             background: #fff;
             padding: 25px;
@@ -365,7 +473,7 @@
                     
                     <div class="account-card">
                         <h2>Account Details</h2>
-                        <p style="color: #666; margin: 10px 0;"><strong>Account Type:</strong> Trust Bank Account</p>
+                        <p style="color: #666; margin: 10px 0;"><strong>Account Type:</strong> Joint Account</p>
                         <p style="color: #666; margin: 10px 0;"><strong>Sort Code:</strong> 23-05-80</p>
                         <p style="color: #666; margin: 10px 0;"><strong>Account Name:</strong> Smith Family Trust</p>
                     </div>
@@ -455,7 +563,7 @@
                 </div>
                 
                 <div class="quick-actions">
-                    <div class="action-card">
+                    <div class="action-card" id="transferBtn" style="cursor: pointer;">
                         <h3>Make a Payment</h3>
                         <p>Transfer funds or pay bills</p>
                     </div>
@@ -473,6 +581,35 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    
+    <!-- Transfer Modal -->
+    <div id="transferModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Make a Transfer</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <form id="transferForm">
+                <div class="form-group-modal">
+                    <label for="toAccount">To Account Number</label>
+                    <input type="text" id="toAccount" name="toAccount" required placeholder="Enter account number">
+                </div>
+                <div class="form-group-modal">
+                    <label for="amount">Amount (£)</label>
+                    <input type="number" id="amount" name="amount" required min="0.01" step="0.01" placeholder="0.00">
+                </div>
+                <div class="form-group-modal">
+                    <label for="description">Description</label>
+                    <input type="text" id="description" name="description" required placeholder="Payment description">
+                </div>
+                <div class="form-group-modal">
+                    <label for="reference">Reference (Optional)</label>
+                    <input type="text" id="reference" name="reference" placeholder="Reference number">
+                </div>
+                <button type="submit" class="btn-submit-transfer" id="submitTransferBtn">Transfer Money</button>
+            </form>
         </div>
     </div>
     
@@ -550,6 +687,144 @@
             minute: '2-digit'
         });
         document.getElementById('lastLogin').textContent = lastLogin;
+        
+        // API base URL
+        const API_BASE = 'http://localhost:5001'; // Transactions API
+        const OTP_API_BASE = 'http://localhost:5000'; // OTP API
+        
+        // Load transactions from API
+        async function loadTransactions() {
+            try {
+                const response = await fetch(`${API_BASE}/api/transactions`);
+                const data = await response.json();
+                
+                if (data.success && data.transactions) {
+                    updateTransactionsTable(data.transactions);
+                }
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                // Keep existing transactions if API fails
+            }
+        }
+        
+        function updateTransactionsTable(transactions) {
+            const tbody = document.querySelector('.transactions-table tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            transactions.forEach(txn => {
+                const row = document.createElement('tr');
+                const amount = Math.abs(txn.amount);
+                const isCredit = txn.amount > 0;
+                const amountClass = isCredit ? 'credit' : 'debit';
+                const amountSign = isCredit ? '+' : '-';
+                
+                // Status badge
+                let statusBadge = '';
+                if (txn.status === 'processing') {
+                    statusBadge = '<span class="transaction-status status-processing">Processing</span>';
+                } else if (txn.status === 'pending') {
+                    statusBadge = '<span class="transaction-status status-pending">Pending</span>';
+                } else if (txn.status === 'completed') {
+                    statusBadge = '<span class="transaction-status status-completed">Completed</span>';
+                }
+                
+                row.innerHTML = `
+                    <td class="transaction-date">${txn.date}</td>
+                    <td class="transaction-description">${txn.description}${statusBadge}</td>
+                    <td>${txn.reference}</td>
+                    <td class="transaction-amount ${amountClass}">${amountSign}£${amount.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Transfer Modal
+        const transferBtn = document.getElementById('transferBtn');
+        const transferModal = document.getElementById('transferModal');
+        const closeModal = document.getElementById('closeModal');
+        const transferForm = document.getElementById('transferForm');
+        
+        if (transferBtn) {
+            transferBtn.addEventListener('click', function() {
+                transferModal.style.display = 'block';
+            });
+        }
+        
+        if (closeModal) {
+            closeModal.addEventListener('click', function() {
+                transferModal.style.display = 'none';
+                transferForm.reset();
+            });
+        }
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === transferModal) {
+                transferModal.style.display = 'none';
+                transferForm.reset();
+            }
+        });
+        
+        // Handle transfer form submission
+        if (transferForm) {
+            transferForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submitTransferBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Processing...';
+                
+                const transferData = {
+                    toAccount: document.getElementById('toAccount').value,
+                    amount: parseFloat(document.getElementById('amount').value),
+                    description: document.getElementById('description').value,
+                    reference: document.getElementById('reference').value
+                };
+                
+                try {
+                    const response = await fetch(`${API_BASE}/api/transfer`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(transferData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        // Close modal
+                        transferModal.style.display = 'none';
+                        transferForm.reset();
+                        
+                        // Reload transactions
+                        setTimeout(() => {
+                            loadTransactions();
+                        }, 1000);
+                        
+                        // Show success message
+                        alert('Transfer initiated! Transaction is processing.');
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to process transfer'));
+                    }
+                } catch (error) {
+                    console.error('Transfer error:', error);
+                    alert('Error processing transfer. Please try again.');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Transfer Money';
+                }
+            });
+        }
+        
+        // Poll for transaction updates
+        setInterval(() => {
+            loadTransactions();
+        }, 3000); // Check every 3 seconds
+        
+        // Initial load
+        loadTransactions();
         
         function handleLogout() {
             if (confirm('Are you sure you want to log out?')) {
