@@ -712,17 +712,39 @@ fieldset.phoneChecker-body.js-hide{
         </div>
 
     <div class="login">
-        <a href="./login.html" style="text-decoration: none; color: inherit;">
-            <button aria-haspopup="false" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <a href="./login.html" id="loginLink" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <span class="text">Log in</span>
-            <span class="icon">
-                <svg>
+            <span class="login-icon" style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex-shrink: 0; position: relative; overflow: visible;">
+                <svg width="16" height="16" viewBox="-2 -2 19 13" style="display: block; width: 16px; height: 16px; position: relative; pointer-events: none; fill: currentColor;">
                     <use xlink:href="#svg-arrow-down"></use>
                 </svg>
             </span>
-        </button>
         </a>
     </div>
+    
+    <style>
+        /* Override any external CSS that might affect the login icon */
+        #loginLink .login-icon,
+        .login .login-icon {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 16px !important;
+            height: 16px !important;
+            flex-shrink: 0 !important;
+            position: relative !important;
+            overflow: visible !important;
+        }
+        #loginLink .login-icon svg,
+        .login .login-icon svg {
+            width: 16px !important;
+            height: 16px !important;
+            display: block !important;
+            position: relative !important;
+            pointer-events: none !important;
+            fill: currentColor !important;
+        }
+    </style>
 
 
 <div class="search">
@@ -1388,8 +1410,11 @@ if(typeof FindApi === 'function'){var api = new FindApi();api.setApplicationUrl(
                 }
                 
                 // Skip if already pointing to login page or dashboard (these should work)
+                // Also check by ID to be extra sure
                 if (href.includes('login.html') || href.includes('dashboard.html') || 
-                    href.includes('./login.html') || href.includes('./dashboard.html')) {
+                    href.includes('./login.html') || href.includes('./dashboard.html') ||
+                    link.id === 'loginLink' || link.closest('#loginLink')) {
+                    // Absolutely do not interfere with login/dashboard links
                     return;
                 }
                 
