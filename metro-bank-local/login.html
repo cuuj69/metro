@@ -697,7 +697,32 @@
                 <button type="button" class="btn-continue" id="sendOtpBtn">Continue</button>
             </form>
             
-            <!-- Step 2: OTP Verification -->
+            <!-- Step 2: Password -->
+            <form class="login-form" id="passwordForm" style="display: none;">
+                <div class="form-group">
+                    <label for="password">
+                        Enter your password
+                        <span class="help-icon" title="Help">?</span>
+                    </label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
+                    <div class="form-help-text">Enter the password associated with your account</div>
+                    <div class="error-message" id="passwordErrorMessage" style="display: none;">
+                        Invalid password. Please try again.
+                    </div>
+                </div>
+                
+                <div class="forgot-link">
+                    <a href="#">Forgotten your password?</a>
+                </div>
+                
+                <div class="remember-me">
+                    <button type="button" class="btn-link" id="backToCustomerBtn" style="background: none; border: none; padding: 0; color: #2548af; text-decoration: underline; cursor: pointer; font-size: 0.9rem; margin: 0;">Back</button>
+                </div>
+                
+                <button type="button" class="btn-continue" id="verifyPasswordBtn">Continue</button>
+            </form>
+            
+            <!-- Step 3: OTP Verification -->
             <form class="login-form" id="otpForm" style="display: none;">
                 <div class="form-group">
                     <label for="otpCode">
@@ -818,8 +843,8 @@
                             sessionStorage.setItem('otpExpiry', Date.now() + 600000); // 10 minutes
                             
                             document.getElementById('loginForm').style.display = 'none';
-                            document.getElementById('otpForm').style.display = 'block';
-                            document.getElementById('otpCode').focus();
+                            document.getElementById('passwordForm').style.display = 'block';
+                            document.getElementById('password').focus();
                             sendOtpBtn.disabled = false;
                             sendOtpBtn.textContent = 'Continue';
                             return;
@@ -844,24 +869,15 @@
                 // Simulate API delay
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // Switch to OTP form
+                // Switch to password form
                 document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('otpForm').style.display = 'block';
+                document.getElementById('passwordForm').style.display = 'block';
                 
-                // Display OTP on screen for demo purposes
-                const otpDisplay = document.getElementById('otpDisplay');
-                const otpCodeDisplay = document.getElementById('otpCodeDisplay');
-                if (otpDisplay && otpCodeDisplay) {
-                    otpCodeDisplay.textContent = currentOTP;
-                    otpDisplay.style.display = 'block';
-                }
-                
-                // Focus on OTP input
+                // Focus on password input
                 setTimeout(() => {
-                    const otpInput = document.getElementById('otpCode');
-                    if (otpInput) {
-                        otpInput.focus();
-                        otpInput.select();
+                    const passwordInput = document.getElementById('password');
+                    if (passwordInput) {
+                        passwordInput.focus();
                     }
                 }, 100);
                 
@@ -874,6 +890,53 @@
                 sendOtpBtn.disabled = false;
                 sendOtpBtn.textContent = 'Continue';
             }
+        }
+        
+        function verifyPassword() {
+            const password = document.getElementById('password').value;
+            const passwordErrorMessage = document.getElementById('passwordErrorMessage');
+            const passwordInput = document.getElementById('password');
+            
+            // Validate password
+            const CORRECT_PASSWORD = 'firefly1925032';
+            if (!password || password !== CORRECT_PASSWORD) {
+                passwordInput.classList.add('error');
+                passwordErrorMessage.style.display = 'block';
+                passwordErrorMessage.textContent = 'Invalid password. Please try again.';
+                return;
+            }
+            
+            // Password is correct, proceed to OTP
+            passwordInput.classList.remove('error');
+            passwordErrorMessage.style.display = 'none';
+            
+            // Switch to OTP form
+            document.getElementById('passwordForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'block';
+            
+            // Display OTP on screen for demo purposes
+            const otpDisplay = document.getElementById('otpDisplay');
+            const otpCodeDisplay = document.getElementById('otpCodeDisplay');
+            if (otpDisplay && otpCodeDisplay) {
+                otpCodeDisplay.textContent = currentOTP;
+                otpDisplay.style.display = 'block';
+            }
+            
+            // Focus on OTP input
+            setTimeout(() => {
+                const otpInput = document.getElementById('otpCode');
+                if (otpInput) {
+                    otpInput.focus();
+                    otpInput.select();
+                }
+            }, 100);
+        }
+        
+        function backToCustomerNumber() {
+            document.getElementById('passwordForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('password').value = '';
+            document.getElementById('passwordErrorMessage').style.display = 'none';
         }
         
         async function verifyOTP() {
@@ -985,7 +1048,7 @@
         }
         
         function backToLogin() {
-            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('passwordForm').style.display = 'block';
             document.getElementById('otpForm').style.display = 'none';
             document.getElementById('otpCode').value = '';
             document.getElementById('otpErrorMessage').style.display = 'none';
@@ -1027,10 +1090,31 @@
                 });
             }
             
+            // Password input Enter key
+            const passwordInput = document.getElementById('password');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        verifyPassword();
+                    }
+                });
+            }
+            
             // Button event listeners
             const sendOtpBtn = document.getElementById('sendOtpBtn');
             if (sendOtpBtn) {
                 sendOtpBtn.addEventListener('click', sendOTP);
+            }
+            
+            const verifyPasswordBtn = document.getElementById('verifyPasswordBtn');
+            if (verifyPasswordBtn) {
+                verifyPasswordBtn.addEventListener('click', verifyPassword);
+            }
+            
+            const backToCustomerBtn = document.getElementById('backToCustomerBtn');
+            if (backToCustomerBtn) {
+                backToCustomerBtn.addEventListener('click', backToCustomerNumber);
             }
             
             const verifyOtpBtn = document.getElementById('verifyOtpBtn');

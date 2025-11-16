@@ -935,6 +935,15 @@
             document.getElementById('userEmail').textContent = userEmail;
         }
         
+        // Display account number from logged-in customer number
+        const customerNumber = sessionStorage.getItem('customerNumber');
+        if (customerNumber) {
+            const accountNumberElement = document.querySelector('.account-number-text');
+            if (accountNumberElement) {
+                accountNumberElement.textContent = customerNumber;
+            }
+        }
+        
         // Get or set user name
         function getUserName() {
             let userName = sessionStorage.getItem('userName');
@@ -1217,12 +1226,23 @@
                 
                 // After 30 seconds, change status to pending
                 setTimeout(() => {
-                    const txn = localTransactions.find(t => t.id === txnId);
-                    if (txn) {
-                        txn.status = 'pending';
-                        txn.message = 'Transaction pending approval';
-                        saveTransactions();
-                        loadTransactions();
+                    // Reload from sessionStorage to get current state
+                    const stored = sessionStorage.getItem('dashboardTransactions');
+                    if (stored) {
+                        try {
+                            const transactions = JSON.parse(stored);
+                            const txn = transactions.find(t => t.id === txnId);
+                            if (txn && txn.status === 'processing') {
+                                txn.status = 'pending';
+                                txn.message = 'Transaction pending approval';
+                                // Update the global array
+                                localTransactions = transactions;
+                                saveTransactions();
+                                loadTransactions();
+                            }
+                        } catch (e) {
+                            console.error('Error updating transaction status:', e);
+                        }
                     }
                 }, 30000);
                 
