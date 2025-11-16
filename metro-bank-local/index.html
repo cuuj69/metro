@@ -1373,61 +1373,95 @@ if(typeof FindApi === 'function'){var api = new FindApi();api.setApplicationUrl(
             </symbol>
         </svg>
     </div>
+    
+    <script>
+        // Redirect all internal and external links back to homepage to prevent broken experience
+        document.addEventListener('DOMContentLoaded', function() {
+            const allLinks = document.querySelectorAll('a[href]');
+            
+            allLinks.forEach(function(link) {
+                const href = link.getAttribute('href');
+                
+                // Skip if no href
+                if (!href) {
+                    return;
+                }
+                
+                // Skip if already pointing to login page or dashboard (these should work)
+                if (href.includes('login.html') || href.includes('dashboard.html') || 
+                    href.includes('./login.html') || href.includes('./dashboard.html')) {
+                    return;
+                }
+                
+                // Skip if it's already pointing to index.html
+                if (href === './index.html' || href === 'index.html' || href === './' || href === '.') {
+                    // Just scroll to top if already on homepage
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    return;
+                }
+                
+                // Handle anchor links (hash links) - allow smooth scrolling
+                if (href.startsWith('#') && href.length > 1) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const targetId = href.substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        } else {
+                            // If anchor doesn't exist, just scroll to top
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    });
+                    return;
+                }
+                
+                // Handle root path "/" - scroll to top
+                if (href === '/' || href === '/index.html') {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    return;
+                }
+                
+                // Skip if it's a mailto link (let it work normally)
+                if (href.startsWith('mailto:')) {
+                    return;
+                }
+                
+                // Skip if it's a javascript: link
+                if (href.startsWith('javascript:')) {
+                    return;
+                }
+                
+                // Handle ALL other links (internal paths starting with /, external http/https, etc.)
+                // Redirect them all back to homepage with smooth scroll
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Smooth scroll to top first
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    // Then reload homepage after a brief delay
+                    setTimeout(function() {
+                        // If we're already on index.html, just scroll to top
+                        if (window.location.pathname.endsWith('index.html') || 
+                            window.location.pathname === '/' || 
+                            window.location.pathname.endsWith('/')) {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        } else {
+                            // Otherwise navigate to homepage
+                            window.location.href = './index.html';
+                        }
+                    }, 300);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
-
-	<script>
-		// Redirect most links back to homepage, except login and dashboard
-		document.addEventListener('DOMContentLoaded', function() {
-			const allLinks = document.querySelectorAll('a[href]');
-			
-			allLinks.forEach(function(link) {
-				const href = link.getAttribute('href');
-				
-				// Skip if no href
-				if (!href) {
-					return;
-				}
-				
-				// Skip if already pointing to login page or dashboard
-				if (href.includes('login.html') || href.includes('dashboard.html')) {
-					return;
-				}
-				
-				// Skip if it's already pointing to index.html or anchor links
-				if (href === './index.html' || href === 'index.html' || 
-				    href === '#skipToContent' || (href.startsWith('#') && href.length > 1)) {
-					return;
-				}
-				
-				// Handle root path "/" - if already on homepage, just scroll to top
-				if (href === '/' || href === './') {
-					link.addEventListener('click', function(e) {
-						e.preventDefault();
-						window.scrollTo({ top: 0, behavior: 'smooth' });
-					});
-					return;
-				}
-				
-				// Skip if it's a mailto link
-				if (href.startsWith('mailto:')) {
-					return;
-				}
-				
-				// Skip if it's a javascript: link
-				if (href.startsWith('javascript:')) {
-					return;
-				}
-				
-				// Redirect ALL other links to homepage
-				link.addEventListener('click', function(e) {
-					e.preventDefault();
-					e.stopPropagation();
-					window.scrollTo({ top: 0, behavior: 'smooth' });
-					setTimeout(function() {
-						window.location.href = './index.html';
-					}, 100);
-				});
-			});
-		});
-	</script>
