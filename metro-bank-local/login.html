@@ -191,6 +191,8 @@
             color: #333;
             font-family: Polar, Verdana, Arial, sans-serif;
             transition: border-color 0.2s;
+            pointer-events: auto;
+            cursor: text;
         }
         .form-group input.error,
         .form-group input:invalid:not(:placeholder-shown) {
@@ -500,6 +502,8 @@
                 letter-spacing: 8px;
                 text-align: center;
                 font-weight: 600;
+                pointer-events: auto !important;
+                cursor: text !important;
             }
             .otp-actions {
                 flex-direction: column;
@@ -699,8 +703,12 @@
                     <label for="otpCode">
                         Enter the verification code sent to your email
                     </label>
-                    <input type="text" id="otpCode" name="otpCode" required maxlength="6" placeholder="000000" pattern="[0-9]{6}">
+                    <input type="text" id="otpCode" name="otpCode" required maxlength="6" placeholder="000000" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code">
                     <div class="form-help-text">A 6-digit code has been sent to your registered email</div>
+                    <div class="otp-display" id="otpDisplay" style="display: none; margin-top: 10px; padding: 10px; background-color: #f0f0f0; border-radius: 4px; text-align: center; font-family: monospace; font-size: 1.2rem; color: #2548af; font-weight: bold;">
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Your OTP code:</div>
+                        <div id="otpCodeDisplay"></div>
+                    </div>
                     <div class="error-message" id="otpErrorMessage" style="display: none;">
                         Invalid or expired code. Please try again.
                     </div>
@@ -829,8 +837,22 @@
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('otpForm').style.display = 'block';
                 
+                // Display OTP on screen for demo purposes
+                const otpDisplay = document.getElementById('otpDisplay');
+                const otpCodeDisplay = document.getElementById('otpCodeDisplay');
+                if (otpDisplay && otpCodeDisplay) {
+                    otpCodeDisplay.textContent = currentOTP;
+                    otpDisplay.style.display = 'block';
+                }
+                
                 // Focus on OTP input
-                document.getElementById('otpCode').focus();
+                setTimeout(() => {
+                    const otpInput = document.getElementById('otpCode');
+                    if (otpInput) {
+                        otpInput.focus();
+                        otpInput.select();
+                    }
+                }, 100);
                 
             } catch (error) {
                 console.error('Error sending OTP:', error);
