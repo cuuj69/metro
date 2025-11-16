@@ -1,0 +1,13 @@
+[build]
+  # Set the publish directory to metro-bank-local
+  publish = "metro-bank-local"
+  
+  # No build command needed for static site
+  command = ""
+
+[[redirects]]
+  # Redirect root to index.html
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
